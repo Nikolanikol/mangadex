@@ -20,7 +20,8 @@ const MangaPageChapterRow: FC<MangaPageChapterRowProps> = ({ mangaId }) => {
 
   if (isLoading) return <div>loading</div>;
   if (isError) return <div>error</div>;
-  console.log(data);
+  const newData = Object.entries(data);
+  console.log(newData);
   return (
     <div>
       <p>MangaPageChapterRow</p>
