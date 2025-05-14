@@ -4,7 +4,7 @@ import MangaList from "../Components/MangaList/MangaList";
 
 const MainCatalog = () => {
   return (
-    <div className="grid grid-cols-10 w-[1200px]">
+    <div className="grid grid-cols-10 max-w-[1200px] w-full">
       <div className=" col-span-2">
         <TagList />
       </div>

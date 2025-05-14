@@ -4,14 +4,31 @@ import { Pagination } from "antd";
 import MangaCard from "../MangaCard/MangaCard";
 import { useEffect, useState } from "react";
 import { MangaItem } from "./Type";
+import { useStores } from "../../Stores/RootStoreContext";
+import { observer } from "mobx-react-lite";
 
-const fetchData = async (offset = 1) => {
+const fetchData = async (
+  offset = 1,
+  tagQuery: string[],
+  contentRating: string[]
+) => {
   const res = await axios.get(
-    `https://api.mangadex.org/manga?limit=12&offset=${offset * 12}`
+    `https://api.mangadex.dev/manga?limit=12&offset=${offset * 12}`,
+    {
+      params: {
+        includedTags: tagQuery,
+        contentRating: contentRating,
+        order: {
+          latestUploadedChapter: "desc",
+        },
+      },
+    }
   );
   return res.data;
 };
-const MangaList = () => {
+const MangaList = observer(() => {
+  const { filterStore } = useStores();
+
   const [data, setData] = useState<MangaItem[] | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,14 +36,15 @@ const MangaList = () => {
   const [total, setTotal] = useState<number | null>(null);
   useEffect(() => {
     setLoading(true);
-    fetchData(curentPage)
+    fetchData(curentPage, filterStore.tagFilter, filterStore.contentRating)
       .then((res) => {
         setData(res.data);
         setTotal(res.total);
         setLoading(false);
       })
       .catch((e) => setError(true));
-  }, [curentPage]);
+    console.log(filterStore.tagFilter);
+  }, [curentPage, filterStore.tagFilter, filterStore.contentRating]);
 
   if (loading) return <div>Загрузка...</div>;
   if (error) return <div>Ошибка:</div>;
@@ -56,6 +74,6 @@ const MangaList = () => {
       </div>
     </div>
   );
-};
+});
 
 export default MangaList;

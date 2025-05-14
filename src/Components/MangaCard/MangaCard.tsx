@@ -25,11 +25,11 @@ const MangaCard: FC<MangaCardProps> = ({ item, id, coverId }) => {
   const [isLoading, setIsLoading] = useState(true);
   if (isLoading) return <div>Загрузка...</div>;
   if (error) return <div>Ошибка:</div>;
-  console.log(item);
+  //   console.log(item);
   const title = item.attributes.altTitles.find((i) => i.en)
     ? item.attributes.altTitles.find((i) => i.en).en
     : "not found";
-  console.log(title);
+  //   console.log(title);
   return (
     <div>
       <div className="min-h-[300px] flex items-center justify-center border-1 border-black">

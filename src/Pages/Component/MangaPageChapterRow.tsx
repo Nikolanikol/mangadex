@@ -29,15 +29,18 @@ const createChapterArr = (min: number, max: number): number[] => {
   return arr;
 };
 const getChapterId = (arr: ChapterItem[], number: number) => {
-  let res = [];
+  let res = {};
   for (let key of arr) {
     if (Array.isArray(key)) {
-      console.log(key);
-      const data = key[1].chapters;
-      res.push(data);
+      const data = Object.values(key[1].chapters).find(
+        (i) => i.chapter === number.toString()
+      );
+      if (data) {
+        res = data;
+      }
     }
   }
-  console.log("RES", res);
+  return res;
 };
 const fetchData = async (mangaId: string) => {
   const res = await axios
@@ -46,6 +49,7 @@ const fetchData = async (mangaId: string) => {
     .then((res) => res.data.volumes);
   return res;
 };
+//////////////////////
 const MangaPageChapterRow: FC<MangaPageChapterRowProps> = ({ mangaId }) => {
   const { data, isError, isLoading } = useQuery({
     queryKey: ["chapters"],
@@ -53,18 +57,34 @@ const MangaPageChapterRow: FC<MangaPageChapterRowProps> = ({ mangaId }) => {
   });
   const [chapter, setChapter] = useState<number | null>(null);
   const [currentChapterId, setCurrentChapterId] = useState<number>();
+  ////////////////////////
+  const [slideData, setSlideData] = useState<ISlideData | null>();
   useEffect(() => {
     if (chapter) {
-      const current = getChapterId(newData, 1);
+      const current = getChapterId(newData, chapter);
+
+      setCurrentChapterId(current.id);
+      //   console.log(currentChapterId);
+      axios
+        .get(`https://api.mangadex.org/at-home/server/${current.id}`)
+        .then((res) => setSlideData(res.data));
     }
   }, [chapter]);
   if (isLoading) return <div>loading</div>;
   if (isError) return <div>error</div>;
+
   const newData = Object.entries(data);
-  console.log(newData);
-  const lastChapter = Object.entries(
-    newData[newData.length - 1][1].chapters
-  ).pop()[0];
+
+  const arr = Object.entries(newData[newData.length - 1][1].chapters);
+
+  const getLastNumber = () => {
+    if (isNaN(Number(arr[arr.length - 1][0]))) return arr[arr.length - 2][0];
+
+    return arr[arr.length - 1][0];
+  };
+  const lastChapter = getLastNumber(data);
+
+  ///////////////////////
   const chapterArr = createChapterArr(1, lastChapter);
 
   return (
@@ -77,8 +97,34 @@ const MangaPageChapterRow: FC<MangaPageChapterRowProps> = ({ mangaId }) => {
           </option>
         ))}
       </select>
+      <div>
+        {slideData &&
+          slideData.chapter.data.map((item) => (
+            <div>
+              <img
+                src={
+                  slideData.baseUrl +
+                  "/data/" +
+                  slideData.chapter.hash +
+                  "/" +
+                  item
+                }
+                alt=""
+              />
+            </div>
+          ))}
+      </div>
     </div>
   );
 };
 
 export default MangaPageChapterRow;
+
+interface ISlideData {
+  baseUrl: string;
+  chapter: IChapter;
+}
+interface IChapter {
+  data: string[];
+  hash: string;
+}
