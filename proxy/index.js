@@ -1,30 +1,32 @@
+// server.js
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
-
+const axios = require("axios");
 const app = express();
-const PORT = 3000;
 
+const PORT = process.env.PORT || 3000;
+// Подключаем middleware CORS для разрешения кросс-доменных запросов
 app.use(cors());
-app.get("/api", async (req, res) => {
-  res.status(200).json({ message: "ok" });
-});
-app.get("/api/cover", async (req, res) => {
-  try {
-    // Прокси-запрос к API
-    const { id } = req.query;
-    console.log("id - ", id);
-    const response = await axios
-      .get(`https://api.mangadex.org/cover/${id}`)
-      .then((res) => res.data.data.attributes.fileName)
-      .catch((e) => console.log(e.message));
 
-    return res.status(200).json({ result: response });
-  } catch (error) {
-    res.status(500).json({ error: "Ошибка запроса к API" });
-  }
+// Для обработки JSON-тел запросов
+app.use(express.json());
+app.get("/", (req, res) => {
+  res.json({ message: "ok!" });
+});
+// Простой маршрут для проверки работы сервера
+app.get("/getmanga", async (req, res) => {
+  const data = await axios
+    .get(`https://api.mangadex.org/manga`)
+    .then((res) => res.data);
+  res.json(data);
+
+  res.send("Привет! Сервер на Node.js, Express и CORS работает.");
 });
 
-app.listen(PORT, () => {
-  console.log(`Прокси-сервер запущен на http://localhost:${PORT}`);
+// Пример дополнительного маршрута
+app.get("/api/data", (req, res) => {
+  res.json({ message: "Это данные с сервера!" });
 });
+
+// Запуск сервера
+app.listen(PORT, () => console.log("hello start app"));
