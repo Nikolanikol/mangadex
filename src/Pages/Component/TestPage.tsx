@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 const TestPage = () => {
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/getmanga`)
+      .get(`https://server-black-eight.vercel.app/getmanga`)
       .then((res) => console.log(res.data));
   }, []);
   return <div>my page</div>;
